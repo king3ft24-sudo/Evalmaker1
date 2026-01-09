@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluation Card Generator</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  background: radial-gradient(circle at top, #0b3d91, #000428);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  text-align: center;
+  padding: 20px;
+  color: #fff;
+}
+h2 { color: #fff; }
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+input[type=text], input[type=file], input[type=color], textarea {
+  padding: 8px;
+  margin: 5px 0;
+  width: 80%;
+  max-width: 300px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+textarea { resize: none; height: 60px; }
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  border: none;
+  background: #444;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover { background: #222; }
+
+.card {
+  width: 360px;
+  margin: 20px auto;
+  background: rgba(255,255,255,0.9);
+  border: 2px solid #444;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: left;
+  box-shadow: 0 0 20px rgba(0,150,255,0.5);
+  color: #000;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+.card img {
+  width: 120px;
+  height: 200px;
+  border-radius: 8px;
+  float: left;
+  margin-right: 15px;
+  object-fit: cover;
+}
+.card-name {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow:
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,  
+    -1px  1px 0 #000,  
+     1px  1px 0 #000,
+     0 0 5px;
+  margin-bottom: 15px;
+}
+.stat {
+  margin: 10px 0;
+  clear: both;
+}
+.bar-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 8px;
+  height: 20px;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  text-align: right;
+  padding-right: 5px;
+  line-height: 20px;
+  color: #fff;
+  font-weight: bold;
+  width: 0;
+  transition: width 0.8s ease-in-out;
+}
+.comments {
+  margin-top: 15px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+.clear { clear: both; }
+</style>
+</head>
+<body>
+
+<h2>Evaluation Card Generator</h2>
+
+<div>
+  <input type="text" id="playerName" placeholder="Player/Mob Name"><br>
+  <input type="text" id="gs" placeholder="Gamesense (A-F)"><br>
+  <input type="text" id="par" placeholder="Parrying (A-F)"><br>
+  <input type="text" id="mov" placeholder="Movement (A-F)"><br>
+  <input type="text" id="agg" placeholder="Aggression (A-F)"><br>
+  <input type="text" id="adp" placeholder="Adaptation (A-F)"><br>
+  <input type="text" id="fin" placeholder="Final Rank (A-F)"><br>
+  <input type="text" id="evaluator" placeholder="Evaluator Name"><br>
+
+  <!-- File uploads with labels -->
+  <label for="img">Upload Profile Picture:</label>
+  <input type="file" id="img" accept="image/*"><br>
+
+  <label for="cardBg">Upload Card Background:</label>
+  <input type="file" id="cardBg" accept="image/*"><br>
+
+  <!-- Color selector for text -->
+  <label for="textColor">Select Text Color:</label>
+  <input type="color" id="textColor" value="#00b8d4"><br>
+
+  <textarea id="comments" placeholder="Comments / Notes"></textarea><br>
+  <button onclick="generate()">Generate Card</button>
+</div>
+
+<div id="result"></div>
+
+<script>
+const gradeToPercent = {S:100, A:85, B:70, C:55, D:40, E:25, F:10};
+const gradeToColor = {S:'#28a745', A:'#28a745', B:'#ffc107', C:'#ffc107', D:'#dc3545', E:'#dc3545', F:'#dc3545'};
+
+function createBar(grade){
+  const percent = gradeToPercent[grade] || 0;
+  const color = gradeToColor[grade] || '#000';
+  return `<div class="bar-container">
+            <div class="bar-fill" style="width:${percent}%;background:${color}">${grade}</div>
+          </div>`;
+}
+
+function generate(){
+  const nameVal = document.getElementById("playerName").value || "Unnamed";
+  const gsVal = document.getElementById("gs").value.toUpperCase() || "F";
+  const parVal = document.getElementById("par").value.toUpperCase() || "F";
+  const movVal = document.getElementById("mov").value.toUpperCase() || "F";
+  const aggVal = document.getElementById("agg").value.toUpperCase() || "F";
+  const adpVal = document.getElementById("adp").value.toUpperCase() || "F";
+  const finVal = document.getElementById("fin").value.toUpperCase() || "F";
+  const evalVal = document.getElementById("evaluator").value || "Anonymous";
+  const commentsVal = document.getElementById("comments").value || "";
+  const textColor = document.getElementById("textColor").value || "#00b8d4";
+
+  const cardHTML = `
+    <div class='card' id="card">
+      <div class="card-name" style="color:${textColor}; text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 0 5px ${textColor};">${nameVal}</div>
+      <img id="cardImg" alt="Profile Picture">
+      <div class="stat" style="color:${textColor}">Gamesense: ${createBar(gsVal)}</div>
+      <div class="stat" style="color:${textColor}">Parrying:  ${createBar(parVal)}</div>
+      <div class="stat" style="color:${textColor}">Movement:  ${createBar(movVal)}</div>
+      <div class="stat" style="color:${textColor}">Aggression:${createBar(aggVal)}</div>
+      <div class="stat" style="color:${textColor}">Adaptation:${createBar(adpVal)}</div><br>
+      <div class="stat" style="color:${textColor}">Final Rank:${createBar(finVal)}</div><br>
+      <div style="color:${textColor}">Evaluator: ${evalVal}</div>
+      <div class="comments" style="color:${textColor}"><b>Comments:</b><br>${commentsVal}</div>
+      <div class="clear"></div>
+    </div>
+  `;
+
+  document.getElementById("result").innerHTML = cardHTML;
+
+  // Set profile picture
+  const file = document.getElementById("img").files[0];
+  if(file){
+    const url = URL.createObjectURL(file);
+    document.getElementById("cardImg").src = url;
+  }
+
+  // Set card background
+  const bgFile = document.getElementById("cardBg").files[0];
+  if(bgFile){
+    const url = URL.createObjectURL(bgFile);
+    document.getElementById("card").style.backgroundImage = `url(${url})`;
+    document.getElementById("card").style.backgroundSize = "cover";
+    document.getElementById("card").style.backgroundPosition = "center";
+  } else {
+    document.getElementById("card").style.background = "rgba(255,255,255,0.9)";
+  }
+
+  // Animate bars
+  const bars = document.querySelectorAll('.bar-fill');
+  bars.forEach(bar => {
+    const width = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(()=>{bar.style.width = width;}, 50);
+  });
+}
+</script>
+
+</body>
+</html>
